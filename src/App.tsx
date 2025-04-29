@@ -8,8 +8,9 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
-import AnalysisFlow from "./components/AnalysisFlow";
+import AnalysisPage from "./pages/AnalysisPage";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -23,11 +24,12 @@ const App = () => (
           <Layout>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/" element={<Index />} />
               <Route 
-                path="/" 
+                path="/bedarfsanalyse" 
                 element={
                   <ProtectedRoute>
-                    <AnalysisFlow />
+                    <AnalysisPage />
                   </ProtectedRoute>
                 } 
               />

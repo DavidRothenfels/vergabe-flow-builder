@@ -10,7 +10,7 @@ const Index = () => {
   useEffect(() => {
     if (!isLoading) {
       // Redirect based on authentication status
-      navigate(isAuthenticated ? "/" : "/login", { replace: true });
+      navigate(isAuthenticated ? "/bedarfsanalyse" : "/login", { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate]);
   
