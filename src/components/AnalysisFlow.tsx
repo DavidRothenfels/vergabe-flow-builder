@@ -16,9 +16,10 @@ import {
 } from "../services/apiService";
 import { generatePDF } from "../services/pdfService";
 import { toast } from "sonner";
-import { Download } from "lucide-react";
+import { Download, ChevronRight, CheckCircle, FileText, Edit, MessageSquare } from "lucide-react";
 import QuestionForm from "./QuestionForm";
 import ResultsSummary from "./ResultsSummary";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 
 // Define the steps of the analysis flow
 enum Step {
@@ -47,9 +48,12 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <Card className="notion-card mb-6">
+    <Card className="notion-card mb-6 animate-scale-in">
       <div className="p-6">
-        <h3 className="text-lg font-medium mb-4">API-Schlüssel eingeben</h3>
+        <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+          <MessageSquare className="text-primary h-5 w-5" />
+          API-Schlüssel eingeben
+        </h3>
         <p className="text-muted-foreground mb-4">
           Als nicht angemeldeter Nutzer benötigen Sie einen OpenRouter API-Schlüssel, 
           um die KI-Funktionen zu nutzen.
@@ -74,6 +78,47 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ onSubmit }) => {
         </form>
       </div>
     </Card>
+  );
+};
+
+// Progress indicator for the analysis flow
+const ProgressIndicator = ({ currentStep }: { currentStep: Step }) => {
+  const steps = [
+    { id: Step.ProjectInfo, label: "Projekt" },
+    { id: Step.InitialQuestions, label: "Fragen" },
+    { id: Step.FollowUpQuestions, label: "Details" },
+    { id: Step.Summary, label: "Zusammenfassung" },
+    { id: Step.FinalDescription, label: "Ergebnis" },
+  ];
+
+  return (
+    <div className="flex items-center justify-center mb-8">
+      {steps.map((step, index) => (
+        <div className="flex items-center" key={step.id}>
+          <div 
+            className={`progress-step ${
+              currentStep === step.id ? "active" : 
+              currentStep > step.id ? "completed" : ""
+            }`}
+            title={step.label}
+          >
+            {currentStep > step.id ? (
+              <CheckCircle className="h-4 w-4" />
+            ) : (
+              index + 1
+            )}
+          </div>
+          
+          {index < steps.length - 1 && (
+            <div 
+              className={`progress-line ${
+                currentStep > step.id ? "active" : ""
+              }`}
+            />
+          )}
+        </div>
+      ))}
+    </div>
   );
 };
 
@@ -217,9 +262,15 @@ const AnalysisFlow = () => {
   return (
     <div className="notion-container">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-semibold notion-heading mb-2">Vergabebausteine</h1>
-        <p className="text-muted-foreground">Bedarfsanalyse für Ihren Vergabeprozess</p>
+        <h1 className="text-3xl font-semibold notion-heading mb-2 animate-fade-in">
+          Vergabebausteine
+        </h1>
+        <p className="text-muted-foreground animate-fade-in">
+          Bedarfsanalyse für Ihren Vergabeprozess
+        </p>
       </div>
+      
+      <ProgressIndicator currentStep={currentStep} />
 
       {/* API Key form for non-authenticated users */}
       {!isAuthenticated && !apiKeySubmitted && (
@@ -230,7 +281,10 @@ const AnalysisFlow = () => {
       {currentStep === Step.ProjectInfo && (
         <Card className="notion-card">
           <div className="p-6">
-            <h2 className="text-xl font-medium mb-6">Projektinformation</h2>
+            <h2 className="text-xl font-medium mb-6 flex items-center">
+              <FileText className="mr-2 h-5 w-5 text-primary" />
+              Projektinformation
+            </h2>
             <div className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="procurement-type">Beschaffungstyp</Label>
@@ -258,10 +312,17 @@ const AnalysisFlow = () => {
               
               <Button 
                 onClick={startAnalysis} 
-                className="notion-btn-primary"
+                className="notion-btn-primary w-full sm:w-auto flex items-center justify-center gap-2"
                 disabled={isLoading || (!isAuthenticated && !apiKeySubmitted)}
               >
-                {isLoading ? "Wird generiert..." : "Analyse starten"}
+                {isLoading ? (
+                  <span className="inline-block animate-pulse">Wird generiert...</span>
+                ) : (
+                  <>
+                    Analyse starten
+                    <ChevronRight className="h-4 w-4" />
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -272,7 +333,8 @@ const AnalysisFlow = () => {
       {(currentStep === Step.InitialQuestions || currentStep === Step.FollowUpQuestions) && (
         <Card className="notion-card">
           <div className="p-6">
-            <h2 className="text-xl font-medium mb-6">
+            <h2 className="text-xl font-medium mb-6 flex items-center">
+              <MessageSquare className="mr-2 h-5 w-5 text-primary" />
               {currentStep === Step.InitialQuestions
                 ? "Initiale Fragen"
                 : "Weiterführende Fragen"}
@@ -296,7 +358,10 @@ const AnalysisFlow = () => {
       {currentStep === Step.Summary && (
         <Card className="notion-card">
           <div className="p-6">
-            <h2 className="text-xl font-medium mb-6">Zusammenfassung</h2>
+            <h2 className="text-xl font-medium mb-6 flex items-center">
+              <FileText className="mr-2 h-5 w-5 text-primary" />
+              Zusammenfassung
+            </h2>
             
             <ResultsSummary
               procurementType={procurementType}
@@ -308,18 +373,26 @@ const AnalysisFlow = () => {
             <div className="mt-6 flex flex-col sm:flex-row gap-4">
               <Button 
                 onClick={createFinalDescription} 
-                className="notion-btn-primary"
+                className="notion-btn-primary flex items-center gap-2"
                 disabled={isLoading}
               >
-                {isLoading ? "Wird generiert..." : "Bedarfsbeschreibung erstellen"}
+                {isLoading ? (
+                  <span className="inline-block animate-pulse">Wird generiert...</span>
+                ) : (
+                  <>
+                    Bedarfsbeschreibung erstellen
+                    <ChevronRight className="h-4 w-4" />
+                  </>
+                )}
               </Button>
               
               <Button 
                 onClick={() => setCurrentStep(Step.InitialQuestions)} 
                 variant="outline" 
-                className="notion-btn-secondary"
+                className="notion-btn-secondary flex items-center gap-2"
                 disabled={isLoading}
               >
+                <Edit className="h-4 w-4" />
                 Zurück zu den Fragen
               </Button>
             </div>
@@ -331,35 +404,40 @@ const AnalysisFlow = () => {
       {currentStep === Step.FinalDescription && (
         <Card className="notion-card">
           <div className="p-6">
-            <h2 className="text-xl font-medium mb-6">Generierte Bedarfsbeschreibung</h2>
+            <h2 className="text-xl font-medium mb-6 flex items-center">
+              <FileText className="mr-2 h-5 w-5 text-primary" />
+              Generierte Bedarfsbeschreibung
+            </h2>
             
-            <div className="p-4 bg-muted rounded-md mb-6 whitespace-pre-line">
+            <div className="p-4 bg-muted rounded-md mb-6 whitespace-pre-line shadow-inner animate-fade-in">
               {finalDescription}
             </div>
             
             <div className="mt-6 flex flex-col sm:flex-row gap-4">
               <Button 
                 onClick={exportToPDF} 
-                className="notion-btn-primary"
+                className="notion-btn-primary bg-green-600 hover:bg-green-700 flex items-center gap-2"
                 disabled={isLoading}
               >
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="h-4 w-4" />
                 Als PDF exportieren
               </Button>
               
               <Button 
                 onClick={() => setCurrentStep(Step.Summary)} 
                 variant="outline" 
-                className="notion-btn-secondary"
+                className="notion-btn-secondary flex items-center gap-2"
               >
+                <FileText className="h-4 w-4" />
                 Zurück zur Zusammenfassung
               </Button>
               
               <Button 
                 onClick={resetFlow} 
                 variant="ghost" 
-                className="notion-btn-ghost"
+                className="notion-btn-ghost flex items-center gap-2"
               >
+                <MessageSquare className="h-4 w-4" />
                 Neue Analyse starten
               </Button>
             </div>

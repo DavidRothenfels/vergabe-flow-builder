@@ -88,7 +88,7 @@
   }
 
   .notion-card {
-    @apply bg-card border border-border rounded-lg p-6 shadow-sm;
+    @apply bg-card border border-border rounded-lg p-6 shadow-sm transition-all hover:shadow-md animate-fade-in;
   }
 
   .notion-input {
@@ -100,18 +100,52 @@
   }
 
   .notion-btn-primary {
-    @apply notion-btn bg-primary text-primary-foreground shadow hover:bg-primary/90 px-4 py-2;
+    @apply notion-btn bg-primary text-primary-foreground shadow hover:bg-primary/90 px-4 py-2 transition-transform active:scale-95;
   }
 
   .notion-btn-secondary {
-    @apply notion-btn bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 px-4 py-2;
+    @apply notion-btn bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 px-4 py-2 transition-transform active:scale-95;
   }
 
   .notion-btn-ghost {
-    @apply notion-btn hover:bg-accent hover:text-accent-foreground px-4 py-2;
+    @apply notion-btn hover:bg-accent hover:text-accent-foreground px-4 py-2 transition-transform active:scale-95;
   }
 
   .notion-link {
     @apply text-primary underline-offset-4 hover:underline;
+  }
+  
+  .animated-list > * {
+    @apply animate-slide-in;
+    animation-fill-mode: both;
+  }
+  
+  .animated-list > *:nth-child(1) { animation-delay: 0.1s; }
+  .animated-list > *:nth-child(2) { animation-delay: 0.2s; }
+  .animated-list > *:nth-child(3) { animation-delay: 0.3s; }
+  .animated-list > *:nth-child(4) { animation-delay: 0.4s; }
+  .animated-list > *:nth-child(5) { animation-delay: 0.5s; }
+  .animated-list > *:nth-child(6) { animation-delay: 0.6s; }
+  .animated-list > *:nth-child(7) { animation-delay: 0.7s; }
+  .animated-list > *:nth-child(8) { animation-delay: 0.8s; }
+  
+  .progress-step {
+    @apply relative flex items-center justify-center w-8 h-8 rounded-full bg-muted text-muted-foreground border border-border;
+  }
+  
+  .progress-step.active {
+    @apply bg-primary text-primary-foreground border-primary;
+  }
+  
+  .progress-step.completed {
+    @apply bg-green-500 text-white border-green-500;
+  }
+  
+  .progress-line {
+    @apply flex-1 h-0.5 bg-muted;
+  }
+  
+  .progress-line.active {
+    @apply bg-primary;
   }
 }

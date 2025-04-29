@@ -1,10 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
 import { Question, Answer } from "../services/apiService";
 import { toast } from "sonner";
+import { ChevronRight, MessageSquare } from "lucide-react";
 
 interface QuestionFormProps {
   questions: Question[];
@@ -22,13 +23,13 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   
   // Pre-fill with existing answers if available
-  useState(() => {
+  useEffect(() => {
     const prefilledAnswers: Record<string, string> = {};
     existingAnswers.forEach(answer => {
       prefilledAnswers[answer.questionId] = answer.text;
     });
     setAnswers(prefilledAnswers);
-  });
+  }, [existingAnswers]);
   
   const handleAnswerChange = (questionId: string, value: string) => {
     setAnswers(prev => ({
@@ -62,43 +63,58 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {questions.map((question, index) => (
-        <div key={question.id} className="p-4 border border-border rounded-md bg-card">
-          <Label 
-            htmlFor={`question-${question.id}`}
-            className="block mb-2 font-medium"
+      <div className="animated-list">
+        {questions.map((question, index) => (
+          <div 
+            key={question.id} 
+            className="p-4 border border-border rounded-md bg-card mb-4 hover:shadow-md transition-all hover:border-primary/20"
           >
-            {index + 1}. {question.text}
-          </Label>
-          
-          {question.options && question.options.length > 0 ? (
-            <div className="mt-2 text-sm text-muted-foreground">
-              <p className="mb-1">Mögliche Antworten:</p>
-              <ul className="list-disc pl-5 mb-3">
-                {question.options.map((option, i) => (
-                  <li key={i}>{option}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-          
-          <Textarea
-            id={`question-${question.id}`}
-            value={answers[question.id] || ""}
-            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-            placeholder="Ihre Antwort..."
-            className="notion-input mt-2"
-            disabled={isLoading}
-          />
-        </div>
-      ))}
+            <Label 
+              htmlFor={`question-${question.id}`}
+              className="block mb-2 font-medium flex items-start"
+            >
+              <span className="inline-flex items-center justify-center bg-primary text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">
+                {index + 1}
+              </span>
+              <span>{question.text}</span>
+            </Label>
+            
+            {question.options && question.options.length > 0 ? (
+              <div className="mt-2 text-sm text-muted-foreground ml-8">
+                <p className="mb-1">Mögliche Antworten:</p>
+                <ul className="list-disc pl-5 mb-3">
+                  {question.options.map((option, i) => (
+                    <li key={i} className="mb-1 hover:text-foreground transition-colors">{option}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            
+            <Textarea
+              id={`question-${question.id}`}
+              value={answers[question.id] || ""}
+              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+              placeholder="Ihre Antwort..."
+              className="notion-input mt-2 ml-8 transition-all focus:border-primary"
+              disabled={isLoading}
+            />
+          </div>
+        ))}
+      </div>
       
       <Button 
         type="submit" 
-        className="notion-btn-primary"
+        className="notion-btn-primary flex items-center gap-2 w-full sm:w-auto"
         disabled={isLoading}
       >
-        {isLoading ? "Verarbeitung..." : "Antworten einreichen"}
+        {isLoading ? (
+          <span className="inline-block animate-pulse">Verarbeitung...</span>
+        ) : (
+          <>
+            Antworten einreichen
+            <ChevronRight className="h-4 w-4" />
+          </>
+        )}
       </Button>
     </form>
   );
